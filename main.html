@@ -6,13 +6,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>I'm not a robot</title>
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      .tiles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 20px 0;
+      }
+      .tile {
+        width: 100px;
+        height: 100px;
+        border: 2px solid #ccc;
+        cursor: pointer;
+      }
+      .selected {
+        border: 4px solid green;
+      }
+      button {
+        margin: 10px 5px;
+        padding: 10px 20px;
+      }
+    </style>
   </head>
   <body>
     <main>
-      <!-- solution start -->
-      
-      <!-- solution end -->
+      <h3 id="h">Please click on the identical tiles to verify that you are not a robot.</h3>
+      <div class="tiles" id="tileContainer"></div>
+      <button id="reset" style="display:none;">Reset</button>
+      <button id="verify" style="display:none;">Verify</button>
+      <p id="para"></p>
     </main>
-    <script src="./script.js"></script>
+    <script>
+      const tileContainer = document.getElementById("tileContainer");
+      const resetBtn = document.getElementById("reset");
+      const verifyBtn = document.getElementById("verify");
+      const message = document.getElementById("para");
+      const h3 = document.getElementById("h");
+
+      const imgSources = [
+        "https://via.placeholder.com/100?text=1",
+        "https://via.placeholder.com/100?text=2",
+        "https://via.placeholder.com/100?text=3",
+        "https://via.placeholder.com/100?text=4",
+        "https://via.placeholder.com/100?text=5"
+      ];
+
+      let images = [...imgSources];
+      const duplicate = imgSources[Math.floor(Math.random() * imgSources.length)];
+      images.push(duplicate);
+
+      function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      const shuffledImages = shuffle(images);
+      let selectedTiles = [];
+
+      shuffledImages.forEach((src, index) => {
+        const img = document.createElement("img");
+        img.src = src;
+        img.classList.add("tile");
+        img.dataset.index = index;
+        tileContainer.appendChild(img);
+
+        img.addEventListener("click", () => {
+          if (selectedTiles.length >= 2 || img.classList.contains("selected")) return;
+          img.classList.add("selected");
+          selectedTiles.push({ index, src });
+
+          if (selectedTiles.length === 1) {
+            resetBtn.style.display = "inline-block";
+          }
+
+          if (selectedTiles.length === 2) {
+            verifyBtn.style.display = "inline-block";
+          }
+        });
+      });
+
+      resetBtn.addEventListener("click", () => {
+        selectedTiles = [];
+        message.textContent = "";
+        verifyBtn.style.display = "none";
+        resetBtn.style.display = "none";
+        h3.textContent = "Please click on the identical tiles to verify that you are not a robot.";
+        document.querySelectorAll(".tile").forEach(tile => tile.classList.remove("selected"));
+      });
+
+      verifyBtn.addEventListener("click", () => {
+        if (selectedTiles[0].src === selectedTiles[1].src) {
+          message.textContent = "You are a human. Congratulations!";
+        } else {
+          message.textContent = "We can't verify you as a human. You selected the non-identical tiles.";
+        }
+        verifyBtn.style.display = "none";
+      });
+    </script>
   </body>
 </html>
+
